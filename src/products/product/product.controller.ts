@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, NotFoundException, UseInterceptors, UploadedFile, Delete, ParseIntPipe, BadRequestException, Put } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, NotFoundException, UseInterceptors, UploadedFile, Delete, ParseIntPipe, BadRequestException, Put, Query } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -43,13 +43,20 @@ export class ProductController {
     }
 
     @Get()
-    async getProducts() {
-        const product = await this.productService.findAll();
+    async getProducts(
+        @Query('page') page = 1,
+        @Query('limit') limit = 5,
+    ) {
+        const result = await this.productService.findAll(
+            Number(page),
+            Number(limit),
+        );
+
         return {
-            message: 'Product fetched successfully ',
+            message: 'Product fetched successfully',
             statusCode: 200,
-            data: product
-        }
+            ...result,
+        };
     }
 
     @Post('create-orders')
@@ -68,8 +75,8 @@ export class ProductController {
             createProductDto.image = `${baseUrl}/${file.filename}`;
         }
         else if (createProductDto.image?.startsWith('http')) {
-            createProductDto.image = createProductDto.image; 
-            
+            createProductDto.image = createProductDto.image;
+
             createProductDto.image = 'https://via.placeholder.com/150';
         }
 

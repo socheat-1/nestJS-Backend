@@ -105,11 +105,11 @@ export class ProductService {
     async updateProduct(productId: number, updateProductDto: UpdateProductDto) {
         console.log('Updating category to ID:', updateProductDto.category_id);
 
-        return await this.dataSource.transaction(async (manager) => {            
+        return await this.dataSource.transaction(async (manager) => {
 
-            const product = await manager.createQueryBuilder(Product,'p')
+            const product = await manager.createQueryBuilder(Product, 'p')
                 .leftJoinAndSelect('p.category', 'cat')
-                .where('p.id = :id', {id: productId})
+                .where('p.id = :id', { id: productId })
                 .getOne();
 
             if (!product) throw new NotFoundException('Product not found');
@@ -192,9 +192,11 @@ export class ProductService {
 
         return this.productRepository.save(product);
     }
+    
+    async findAll(page: number = 1, limit: number = 10) {
+        const offset = (page - 1) * limit;
 
-    async findAll(): Promise<Product[]> {
-        let rows = await this.productRepository.createQueryBuilder('p')
+        const query = this.productRepository.createQueryBuilder('p')
             .leftJoin('category', 'cat', 'p.category_id = cat.category_id')
             .select([
                 'p.id as id',
@@ -208,9 +210,24 @@ export class ProductService {
                 'cat.category_id as category_id',
                 'cat.category_name as category_name',
                 'p.created_at as createdAt',
-                'p.updated_at as updatedAt'
-                ,]).getRawMany();
-        return rows;
+                'p.updated_at as updatedAt',
+            ]);
+
+        // total records
+        const total = await query.getCount();
+
+        // paginated data
+        const rows = await query
+            .limit(limit)
+            .offset(offset)
+            .getRawMany();
+
+        return {
+            data: rows,
+            total,
+            page,
+            limit,
+        };
     }
 
     async getProductStock(productId: number) {
