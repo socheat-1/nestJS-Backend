@@ -50,6 +50,31 @@ export class OrderService {
     };
   }
 
+async getOrders(page: number, limit: number) {
+  const [items, total_order] = await this.orderItemRepository.findAndCount({
+    relations: ['product'], // 👈 REQUIRED
+    skip: (page - 1) * limit,
+    take: limit,
+    order: { id: 'DESC' },
+  });
+
+  return {
+    data: items.map(item => ({
+      id: item.id,
+      image: item.product.image,
+      product_name: item.product?.name || 'N/A',
+      category_name: item.product?.category.category_name,
+      discoount: item.product.discount,
+      qty: item.qty,
+      price_after_dis: item.price,
+      createAt: new Date(item.createAt).toISOString()
+    })),
+    total_order,
+    page,
+    limit,
+  };
+}
+
   async createOrder(createOrderDto: CreateOrderDto) {
     const { userId, items } = createOrderDto;
 

@@ -1,10 +1,11 @@
 // product/orders/order.controller.ts
-import { Controller, Post, Body, Get, Param, UseGuards, Res, Render, ParseIntPipe } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, UseGuards, Res, Render, ParseIntPipe, Query } from '@nestjs/common';
 import express from 'express';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { AuthGuard } from '@nestjs/passport';
 import JsReport from 'jsreport-core';
+import { Product } from '../product/product.entity';
 
 
 
@@ -30,6 +31,13 @@ export class OrderController {
     return this.orderService.findById(Number(id));
   }
 
+  @Get()
+  async getAllOrder(
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.orderService.getOrders(page, limit);
+  }
   // @Get(':id/invoice')
   // @Render('invoice') // uses views/invoice.ejs
   // async getInvoice(@Param('id') id: number) {
@@ -118,7 +126,7 @@ export class OrderController {
               </tr>
             </thead>
             <tbody>
-              ${order.data.products.map((p: any ,index: number) => `
+              ${order.data.products.map((p: any, index: number) => `
                 <tr key={product.id}>
                   <td class="id">${index + 1}</td>
                   <td>${p.name}</td>
@@ -126,7 +134,7 @@ export class OrderController {
                   <td class="price">${p.price}</td>
                 </tr>
               `,
-        )
+    )
         .join('')}
             </tbody>
             <tr>
