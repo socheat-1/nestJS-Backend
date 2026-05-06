@@ -52,23 +52,40 @@ export class OrderService {
 
 async getOrders(page: number, limit: number) {
   const [items, total_order] = await this.orderItemRepository.findAndCount({
-    relations: ['product'], // 👈 REQUIRED
+    relations: {
+      product: {
+        category: true,
+      },
+      order: {
+        user: true,
+      },
+    },
     skip: (page - 1) * limit,
     take: limit,
     order: { id: 'DESC' },
   });
 
+  const data = items.map(item => ({
+    id: item.id,
+
+    user_id: item.order?.user?.id ?? null,
+    user_name: item.order?.user?.f_name ?? 'N/A',
+
+    image: item.product?.image ?? null,
+    product_name: item.product?.name ?? 'N/A',
+    category_name: item.product?.category?.category_name ?? 'N/A',
+
+    discount: item.product?.discount ?? 0,
+    qty: item.qty,
+    price_after_dis: item.price,
+
+    createAt: item.createAt
+      ? new Date(item.createAt).toISOString()
+      : null,
+  }));
+
   return {
-    data: items.map(item => ({
-      id: item.id,
-      image: item.product.image,
-      product_name: item.product?.name || 'N/A',
-      category_name: item.product?.category.category_name,
-      discoount: item.product.discount,
-      qty: item.qty,
-      price_after_dis: item.price,
-      createAt: new Date(item.createAt).toISOString()
-    })),
+    data,
     total_order,
     page,
     limit,
