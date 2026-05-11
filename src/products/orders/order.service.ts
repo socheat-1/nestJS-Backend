@@ -69,7 +69,7 @@ async getOrders(page: number, limit: number) {
     id: item.id,
 
     user_id: item.order?.user?.id ?? null,
-    user_name: item.order?.user?.f_name ?? 'N/A',
+    use_name: item.order?.user?.f_name ?? 'N/A',
 
     image: item.product?.image ?? null,
     product_name: item.product?.name ?? 'N/A',
@@ -110,7 +110,6 @@ async getOrders(page: number, limit: number) {
     let totalPrice = 0;
     let totalQty = 0;
 
-    // This will hold OrderItem entities
     const orderItems: any[] = [];
 
     for (const item of items) {
@@ -127,12 +126,10 @@ async getOrders(page: number, limit: number) {
           `Product "${product.name}" has only ${product.stock} items in stock`
         );
       }
-
-      // Reduce product stock
+      
       product.stock -= item.qty;
       await this.productRepository.save(product);
 
-      // Save stock movement
       await this.stockRepository.save(
         this.stockRepository.create({
           product,
