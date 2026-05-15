@@ -1,6 +1,6 @@
 export class CreateProductDto {
   name: string;
-  price: number;
+  price_full: number;
   discount?:  number;
   stock: number;
   des?: string;

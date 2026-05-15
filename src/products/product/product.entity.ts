@@ -21,7 +21,7 @@ export class Product {
   name: string;
 
   @Column('decimal', { precision: 10, scale: 2 })
-  price: number;
+  price_full: number;
 
   @Column('decimal', { precision: 5, scale: 2, default: 0 })
   discount: number;

@@ -21,8 +21,9 @@ export class OrderItem {
   @Column({ type: 'int' })
   qty: number;
 
-  @Column({ type: 'decimal' })
-  price: number; // price per unit
+
+  @Column({ type: 'decimal', precision: 10, scale: 2 })
+  price_after_discount: number; // price per unit
 
   @CreateDateColumn()
   createAt: Date;

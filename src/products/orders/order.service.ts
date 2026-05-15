@@ -77,8 +77,7 @@ async getOrders(page: number, limit: number) {
 
     discount: item.product?.discount ?? 0,
     qty: item.qty,
-    price_after_dis: item.price,
-
+    price_after_discount: item.price_after_discount,
     createAt: item.createAt
       ? new Date(item.createAt).toISOString()
       : null,
@@ -139,7 +138,7 @@ async getOrders(page: number, limit: number) {
       );
 
       // Calculate price
-      const price = Number(product.price);
+      const price = Number(product.price_full);
       const discount = Number(product.discount ?? 0);
       const finalPrice = price - (price * discount) / 100;
 
@@ -151,7 +150,7 @@ async getOrders(page: number, limit: number) {
         this.orderItemRepository.create({
           product,
           qty: item.qty,
-          price: finalPrice,
+          price_after_discount: finalPrice,
         })
       );
     }

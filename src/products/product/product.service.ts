@@ -29,7 +29,7 @@ export class ProductService {
             .select([
                 'p.id as id',
                 'p.name as name',
-                'p.price as price',
+                'p.price_full as price_full',
                 'p.stock as stock',
                 'p.discount as discount',
                 'p.des as des',
@@ -72,7 +72,7 @@ export class ProductService {
 
         const product = this.productRepository.create({
             name: createProductDto.name,
-            price: createProductDto.price,
+            price_full: createProductDto.price_full,
             discount: createProductDto.discount,
             des: createProductDto.des,
             stock: createProductDto.stock,
@@ -125,7 +125,7 @@ export class ProductService {
 
             // Update other fields
             if (updateProductDto.name !== undefined) product.name = updateProductDto.name;
-            if (updateProductDto.price !== undefined) product.price = updateProductDto.price;
+            if (updateProductDto.price_full !== undefined) product.price_full = updateProductDto.price_full;
             if (updateProductDto.des !== undefined) product.des = updateProductDto.des;
             if (updateProductDto.image !== undefined) product.image = updateProductDto.image;
             if (updateProductDto.isActive !== undefined) product.isActive = updateProductDto.isActive;
@@ -201,7 +201,7 @@ export class ProductService {
             .select([
                 'p.id as id',
                 'p.name as name',
-                'p.price as price',
+                'p.price_full as price_full',
                 'p.discount as discount',
                 'p.stock as stock',
                 'p.des as des',
