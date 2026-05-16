@@ -19,77 +19,77 @@ export class OrderService {
     @InjectRepository(OrderItem) private readonly orderItemRepository: Repository<OrderItem>,
   ) { }
 
-  async findById(id: number) {
-    let order = await this.orderRepository.findOne({
-      where: { orderId: id },
+  async findById(orderId: number) {
+    const order = await this.orderRepository.findOne({
+      where: { orderId: orderId },
       relations: {
         user: true,
-        items: { product: true },
-      },
-      select: {
-        orderId: true,
-        totalPrice: true,
-        quantity: true,
-        user: {
-          id: true,
-          f_name: true,
-          phone: true
+        items: {
+          product: true,
         },
-        products: true
-      }
+      },
     });
 
     if (!order) {
-      throw new NotFoundException(`Order with ID ${id} not found`);
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
     }
 
     return {
-      message: 'View Order fetched successfully ',
+      message: 'View Order fetched successfully',
       statusCode: 200,
-      data: order
+      data: order,
     };
   }
 
-async getOrders(page: number, limit: number) {
-  const [items, total_order] = await this.orderItemRepository.findAndCount({
-    relations: {
-      product: {
-        category: true,
+  async getOrders(page: number, limit: number) {
+    const [items, total_order] = await this.orderItemRepository.findAndCount({
+      relations: {
+        product: {
+          category: true,
+        },
+        order: {
+          user: true,
+        },
       },
-      order: {
-        user: true,
-      },
-    },
-    skip: (page - 1) * limit,
-    take: limit,
-    order: { id: 'DESC' },
-  });
+      skip: (page - 1) * limit,
+      take: limit,
+      order: { id: 'DESC' },
+    });
 
-  const data = items.map(item => ({
-    id: item.id,
+    const data = items.map(item => ({
+      id: item.id,
 
-    user_id: item.order?.user?.id ?? null,
-    use_name: item.order?.user?.f_name ?? 'N/A',
+      // IMPORTANT
+      orderId: item.order?.orderId ?? null,
 
-    image: item.product?.image ?? null,
-    product_name: item.product?.name ?? 'N/A',
-    category_name: item.product?.category?.category_name ?? 'N/A',
+      user_id: item.order?.user?.id ?? null,
+      use_name: item.order?.user?.f_name ?? 'N/A',
 
-    discount: item.product?.discount ?? 0,
-    qty: item.qty,
-    price_after_discount: item.price_after_discount,
-    createAt: item.createAt
-      ? new Date(item.createAt).toISOString()
-      : null,
-  }));
+      image: item.product?.image ?? null,
+      product_name: item.product?.name ?? 'N/A',
 
-  return {
-    data,
-    total_order,
-    page,
-    limit,
-  };
-}
+      category_name:
+        item.product?.category?.category_name ?? 'N/A',
+
+      discount: item.product?.discount ?? 0,
+
+      qty: item.qty,
+
+      price_after_discount:
+        item.price_after_discount,
+
+      createAt: item.createAt
+        ? new Date(item.createAt).toISOString()
+        : null,
+    }));
+
+    return {
+      data,
+      total_order,
+      page,
+      limit,
+    };
+  }
 
   async createOrder(createOrderDto: CreateOrderDto) {
     const { userId, items } = createOrderDto;
@@ -125,7 +125,7 @@ async getOrders(page: number, limit: number) {
           `Product "${product.name}" has only ${product.stock} items in stock`
         );
       }
-      
+
       product.stock -= item.qty;
       await this.productRepository.save(product);
 
